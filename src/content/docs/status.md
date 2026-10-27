@@ -19,11 +19,7 @@ early software: expect rough edges, and read this page before relying on it.
 - sccache, per-checkout output directories, the Gradle home and the disk reserve.
 - The MCP server, the desktop window, the audit log and stall attribution.
 - Linux and macOS, as the submitting machine or as a worker.
-
-## In progress
-
-- Showing each machine's exact build in `--version` and `status`.
-- Clearer wait messages when the job ahead has no estimate.
+- Each machine's exact build (version and commit) in `--version` and `status`, peers included.
 
 ## Known gaps
 
