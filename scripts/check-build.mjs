@@ -24,5 +24,8 @@ for (const route of ['', ...docRoutes]) {
   for (const href of sheets) assert(href?.startsWith('/_astro/') && href.endsWith('.css'), `${page}: unexpected CSS URL ${href}`);
 }
 for (const f of ['fonts/figtree_variable.ttf', 'fonts/plexmono_regular.ttf', 'favicon.svg', 'logo.svg', 'theme.js']) await access(`${dist}/${f}`);
+const installer = await readFile(`${dist}/install.sh`, 'utf8');
+assert(installer.startsWith('#!/bin/sh\n') && installer.trimEnd().endsWith('main "$@"'), 'install.sh: missing or truncated');
+assert(installer.includes('https://repo.osvauld.com/loadtable'), 'install.sh: wrong release location');
 if (/goatcounter|google-analytics|googletagmanager|plausible\.io|posthog/i.test(await readFile(`${dist}/index.html`, 'utf8'))) throw new Error('analytics reference in the site');
 console.log(`${docRoutes.length + 1} pages: strict policy, external CSS and scripts, self-hosted fonts, no tasks2 left.`);
