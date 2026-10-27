@@ -34,6 +34,11 @@ sample names them.
 | `[retention]` | `max_finished_jobs`, `max_job_age_days` | 20000, 60 |
 | `[power]` | `keep_awake` (no sleep while jobs run), `peer_jobs_on_battery` | on, false |
 | `[placement]` | `peer_wait_secs` | 600 |
+| `[machine]` | `devices` (attached test phones), `tools`, `denied_devices` (serials no job may name) | none |
+
+`denied_devices` protects a phone that is plugged in but must never be touched, such as your own:
+a job that names one of those serials anywhere in its command, in any case, or asks for it with
+`--device`, is refused.
 
 Pressure figures are the kernel's stall percentages; memory levels are `normal`, `warn` and
 `critical`. A compile waits while the machine is busier than its limits, so a build never starts

@@ -33,4 +33,7 @@ early software: expect rough edges, and read this page before relying on it.
 - `policy show` does not print the `[placement]` section.
 - Placement has no GPU or file requirements yet.
 - Idle caches are emptied by hand.
-- There is no sandbox: jobs run as your user, with your files. Pair only machines you control.
+- Release builds have no desktop window (`loadtable ui`; build from source for it), and the macOS
+  builds are not signed or notarized.
+- There is no sandbox: jobs run as your user, with your files. Pair only machines you control; see
+  the [security model](/docs/security).
