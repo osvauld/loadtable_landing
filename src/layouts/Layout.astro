@@ -1,0 +1,51 @@
+---
+import '../styles/site.css';
+import '../styles/docs.css';
+const { title, description = 'LoadTable, from Osvauld: one queue for the builds and tests of all your coding agents, run on whichever of your own machines can take them.' } = Astro.props;
+// Vite injects styles and Astro injects dev scripts; hot reload also uses WebSockets.
+// These development allowances must not appear in the production build.
+const connectPolicy = import.meta.env.DEV ? "connect-src 'self' ws: wss:; " : '';
+const inlinePolicy = import.meta.env.DEV ? " 'unsafe-inline'" : '';
+const contentPolicy = `default-src 'none'; ${connectPolicy}script-src 'self'${inlinePolicy}; style-src 'self'${inlinePolicy}; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const path = Astro.url.pathname.replace(/\/$/, '');
+const here = (p: string) => path === p ? 'page' : undefined;
+// "Docs" marks every docs page except the two that have their own link.
+const inDocs = path.startsWith('/docs') && !['/docs/install', '/docs/agents'].includes(path) ? 'page' : undefined;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content={contentPolicy} />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#eef1ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1513" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <title>{title}</title>
+    <script is:inline src="/theme.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="wrap top">
+      <a class="mark" href="/" aria-label="LoadTable by Osvauld, home"><img src="/favicon.svg" alt="" width="22" height="22" />LoadTable<span class="byline">by Osvauld</span></a>
+      <nav aria-label="Main navigation">
+        <a href="/docs" aria-current={inDocs}>Docs</a>
+        <a href="/docs/install" aria-current={here('/docs/install')}>Install</a>
+        <a href="/docs/agents" aria-current={here('/docs/agents')}>For agents</a>
+        <button id="theme" class="theme" type="button" hidden aria-label="Switch light or dark mode"><span class="when-light" aria-hidden="true">☾</span><span class="when-dark" aria-hidden="true">☀</span></button>
+      </nav>
+    </header>
+    <slot />
+    <footer class="wrap end">
+      <span><a href="https://osvauld.com">Made by Osvauld ↗</a> · LoadTable is early software for a handful of personal machines.</span>
+      <span><a href="/docs">Docs</a> · <a href="/docs/status">Status</a> · <a href="mailto:abe@osvauld.com">abe@osvauld.com</a></span>
+    </footer>
+  </body>
+</html>

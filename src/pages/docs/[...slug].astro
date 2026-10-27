@@ -1,0 +1,35 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { docs } from '../../content/docs';
+
+export function getStaticPaths() {
+  return docs.map((doc, i) => ({
+    params: { slug: doc.slug || undefined },
+    props: { doc, prev: docs[i - 1], next: docs[i + 1] },
+  }));
+}
+
+const { doc, prev, next } = Astro.props;
+const { Content } = doc;
+const href = (slug: string) => (slug ? `/docs/${slug}` : '/docs');
+---
+<Layout title={`${doc.title} — LoadTable docs`} description={doc.description}>
+  <div class="wrap docs">
+    <nav class="docs-nav" aria-label="Documentation">
+      <p class="label">Documentation</p>
+      <ul>
+        {docs.map(d => (
+          <li><a href={href(d.slug)} aria-current={d.slug === doc.slug ? 'page' : undefined}>{d.title}</a></li>
+        ))}
+      </ul>
+    </nav>
+    <main id="main" class="docs-body">
+      <p class="docs-note">LoadTable is early software. These pages describe the current development build; see <a href="/docs/status">Status</a> for what is missing.</p>
+      <Content />
+      <nav class="docs-pager" aria-label="Previous and next page">
+        {prev ? <a href={href(prev.slug)}><span>Previous</span>{prev.title}</a> : <span />}
+        {next && <a class="next" href={href(next.slug)}><span>Next</span>{next.title}</a>}
+      </nav>
+    </main>
+  </div>
+</Layout>
