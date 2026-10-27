@@ -1,7 +1,7 @@
 # loadtable-site
 
 The website and documentation of LoadTable, at https://loadtable.osvauld.com.
-Astro, static output, deployed by Netlify from `main` (see `DEPLOY.md`).
+Astro, static output, deployed to Cloudflare Workers from `main` (see `DEPLOY.md`).
 
 ```sh
 npm ci
