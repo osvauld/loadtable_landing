@@ -1,6 +1,6 @@
 ---
 title: Install
-description: "Build LoadTable from source, run the daemon as a user service on Linux or macOS, and check that it works."
+description: "Install a LoadTable release or build from source, run the daemon as a user service on Linux or macOS, and check that it works."
 order: 2
 ---
 
@@ -18,8 +18,8 @@ curl -fsSL https://loadtable.osvauld.com/install.sh | sh
 The script downloads the newest release from `dl.loadtable.osvauld.com` for Linux (x86-64, arm64) or macOS
 (Apple silicon, Intel), checks its SHA-256 and puts `loadtable` and `loadtabled` in `~/.local/bin`.
 It needs no root and starts nothing. Set `LOADTABLE_VERSION=0.1.0` to install a particular release,
-or pass `--uninstall` to remove the two binaries. Release builds include the MCP server but not the
-desktop window; build from source for `loadtable ui`.
+or pass `--uninstall` to remove the two binaries. The same two binaries serve every machine: the CLI
+carries the MCP server and the [desktop window](#the-desktop-window).
 
 You can also download a release by hand from `https://dl.loadtable.osvauld.com/releases/vX.Y.Z/`, with a
 `SHA256SUMS` file next to the archives.
@@ -32,11 +32,10 @@ You need a recent stable Rust toolchain.
 git clone https://github.com/osvauld/loadtable
 cd loadtable
 cargo install --locked --path crates/tasks-daemon --root ~/.local
-cargo install --locked --path crates/tasks-cli --features mcp --root ~/.local
+cargo install --locked --path crates/tasks-cli --features mcp,ui --root ~/.local
 ```
 
-Add `--features ui,mcp` to the second line on a machine where you want the desktop window
-(`loadtable ui`). Make sure `~/.local/bin` is on your `PATH`, and that no older copy of the CLI
+Leave out `ui` (`--features mcp`) for a smaller CLI without the desktop window. Make sure `~/.local/bin` is on your `PATH`, and that no older copy of the CLI
 comes before it (`which -a loadtable`).
 
 ## Run the daemon as a service
@@ -84,6 +83,21 @@ loadtable status                       # slots, pressure, peers
 loadtable run --who me -- uname -a     # a first job
 loadtable cache                        # compiler wrapper, cache root, disk reserve
 ```
+
+## The desktop window
+
+```sh
+loadtable ui
+```
+
+opens a window on the daemon this shell uses: every paired machine with its slots and pressure, the
+queue and running jobs with live logs and estimates, plans as one row each, and tabs for history,
+timings, the audit log and pressure stalls. It reads and acts through the same daemon as the CLI,
+so you can cancel a job, move it up a queue class or drain the machine from it.
+
+It needs a desktop session. The graphics libraries are loaded only when the window opens, so the
+same binary runs on a headless worker; there `loadtable ui` says there is no display and points you
+to `loadtable status` and `loadtable list --active`.
 
 ## Where things live
 

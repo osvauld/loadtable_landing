@@ -36,8 +36,8 @@ early software: expect rough edges, and read this page before relying on it.
 - `policy show` does not print the `[placement]` section.
 - Placement has no GPU or file requirements yet.
 - Idle caches are emptied by hand.
-- Release builds have no desktop window (`loadtable ui`; build from source for it), and the macOS
-  builds are not signed or notarized.
+- The macOS release builds are not signed or notarized (the installer's binaries run; a browser
+  download needs the quarantine flag removed).
 - Jobs you submit on a machine run there as your user, with your files; only jobs from other
   machines are confined. Pair only machines you control, and read the
   [security model](/docs/security).
