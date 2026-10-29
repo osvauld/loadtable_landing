@@ -5,3 +5,8 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   # Each page carries its own policy in a <meta> tag (Layout.astro); the header adds what a meta tag can't.
   Content-Security-Policy: frame-ancestors 'none'; base-uri 'none'; form-action 'none'
+
+# The curl installer: shown as text in a browser, never cached past a release.
+/install.sh
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=300

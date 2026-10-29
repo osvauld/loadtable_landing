@@ -10,6 +10,9 @@ Machines find and reach each other through an encrypted peer-to-peer link. On th
 they connect directly; elsewhere through a public relay that forwards encrypted traffic and cannot
 read it. There is nothing to open on your router.
 
+A machine you pair with the `submit` role can run commands on yours as your user. Read the
+[security model](/docs/security) first.
+
 ## Pair two machines
 
 On the machine that will **take** work (the worker):

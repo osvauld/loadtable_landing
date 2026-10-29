@@ -1,0 +1,27 @@
+name: Build
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      # The same command the Cloudflare build runs.
+      - run: npm run cf:build
+      - name: Check the installer's shell syntax
+        run: sh -n dist/install.sh
+      - name: Reject analytics scripts
+        run: |
+          if grep -REiq 'goatcounter|gc\.zgo\.at|google-analytics|googletagmanager|plausible\.io|posthog' dist; then
+            echo 'Unexpected analytics reference in generated site'
+            exit 1
+          fi

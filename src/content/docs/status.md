@@ -14,16 +14,19 @@ early software: expect rough edges, and read this page before relying on it.
 
 - Queue, admission by slots and pressure, queue classes, the short lane and the light pool.
 - Pairing, placement on peers and `--anywhere`, checkout sync, live logs, fetching outputs.
-- Timing history with separate warm and cold estimates.
+- Timing history with separate warm and cold estimates. A command with no runs of its own is
+  estimated from similar builds on the machine, and the estimate says what it is based on.
 - Run policy with suites, split test plans and suggestions from history.
 - sccache, per-checkout output directories, the Gradle home and the disk reserve.
 - The MCP server, the desktop window, the audit log and stall attribution.
+- Jobs from other machines run confined to the build cache and toolchains.
+- Each machine's exact build in `--version` and `status`.
 - Linux and macOS, as the submitting machine or as a worker.
 
 ## In progress
 
-- Showing each machine's exact build in `--version` and `status`.
-- Clearer wait messages when the job ahead has no estimate.
+- Confinement on macOS is new and has had less use than on Linux.
+- Suggesting split steps when one Gradle command both builds and tests.
 
 ## Known gaps
 
@@ -33,4 +36,8 @@ early software: expect rough edges, and read this page before relying on it.
 - `policy show` does not print the `[placement]` section.
 - Placement has no GPU or file requirements yet.
 - Idle caches are emptied by hand.
-- There is no sandbox: jobs run as your user, with your files. Pair only machines you control.
+- Release builds have no desktop window (`loadtable ui`; build from source for it), and the macOS
+  builds are not signed or notarized.
+- Jobs you submit on a machine run there as your user, with your files; only jobs from other
+  machines are confined. Pair only machines you control, and read the
+  [security model](/docs/security).
