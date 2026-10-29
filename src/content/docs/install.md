@@ -15,13 +15,13 @@ agents run on and each worker.
 curl -fsSL https://loadtable.osvauld.com/install.sh | sh
 ```
 
-The script downloads the newest release from `repo.osvauld.com` for Linux (x86-64, arm64) or macOS
+The script downloads the newest release from `dl.loadtable.osvauld.com` for Linux (x86-64, arm64) or macOS
 (Apple silicon, Intel), checks its SHA-256 and puts `loadtable` and `loadtabled` in `~/.local/bin`.
 It needs no root and starts nothing. Set `LOADTABLE_VERSION=0.1.0` to install a particular release,
 or pass `--uninstall` to remove the two binaries. Release builds include the MCP server but not the
 desktop window; build from source for `loadtable ui`.
 
-You can also download a release by hand from `https://repo.osvauld.com/loadtable/releases/`, with a
+You can also download a release by hand from `https://dl.loadtable.osvauld.com/releases/vX.Y.Z/`, with a
 `SHA256SUMS` file next to the archives.
 
 ## Build from source

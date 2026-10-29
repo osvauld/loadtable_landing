@@ -1,6 +1,6 @@
 ---
 title: Security model
-description: "What a paired machine can do, what crosses the network, and what LoadTable does not protect against."
+description: "What a paired machine can do, what a job from it may reach, what crosses the network, and what LoadTable does not protect against."
 order: 8.5
 ---
 
@@ -8,14 +8,28 @@ order: 8.5
 
 LoadTable is for a handful of machines that one person or a small team controls. Pairing two
 machines is a decision to let one run commands on the other. Read this before you pair a machine
-you do not fully trust.
+you do not fully trust, and before you point an agent you do not fully trust at a paired machine.
 
-## A paired machine runs commands as you
+## A paired machine runs commands on yours
 
-A peer with the `submit` role can send any command, and it runs on your machine **as the user the
-daemon runs as**, with that user's files, keys and network access. There is no sandbox, container
-or separate account. The submit rules (broad tests, shell scripts, denied devices) keep agents
-efficient; they are not a security boundary.
+A peer with the `submit` role can send any command. It runs on your machine as the user the daemon
+runs as, confined by the operating system (Landlock on Linux, Seatbelt on macOS): it can read and
+write the build cache, its synced checkout, temp and the toolchains (`~/.cargo`, `~/.rustup`,
+`~/.gradle`, the Android SDK, `~/Library/Developer`), read the system and a few tool settings, and
+cannot open anything else in your home folder, other volumes or `/root`. The first lines of its
+log say what it may reach. A job that cannot be confined is refused, never run open. Jobs you
+submit on a machine yourself are not confined. `[confine]` in the
+[machine policy](/docs/machine-policy) widens this or switches it off.
+
+Confinement keeps a job out of your files. It does not make the job harmless:
+
+- The toolchains and caches it may write are the ones your own builds use. A job that changes
+  `~/.cargo/config.toml`, a Gradle init script or a cached tool runs code as you on your next
+  build, confined or not.
+- The job has the network. It can send what it may read, which includes the synced checkout and
+  the caches, anywhere it likes.
+- The submit rules (broad tests, shell scripts, denied devices) keep agents efficient; they are
+  not a security boundary.
 
 So:
 
@@ -23,6 +37,8 @@ So:
 - Give `observe` to a machine that only needs to watch. It sees status, jobs, command lines and
   logs, which can contain paths and output you consider private.
 - `admin` (drain, resume) is for your own machines.
+- An agent that can submit to a paired machine gets everything above on that machine. LoadTable
+  bounds what a job can reach, not what an agent chooses to ask for.
 
 ## Pairing and identity
 
@@ -63,7 +79,9 @@ jobs are not recorded, only the rule that refused them.
 
 - A machine that is already compromised, or a user account on it: the daemon trusts its own user.
 - A paired machine acting maliciously within its roles: that is what the roles allow.
-- Jobs reading each other's files: they run as the same user and share caches.
+- A job from a peer changing the toolchains and caches it may write, as above.
+- Jobs you submit on a machine reading each other's files: they run unconfined as the same user
+  and share caches.
 - A paired machine flooding you with work: slots and pressure limits keep your machine usable, and
   revoking stops it.
 

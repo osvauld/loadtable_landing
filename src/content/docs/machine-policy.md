@@ -34,15 +34,46 @@ sample names them.
 | `[retention]` | `max_finished_jobs`, `max_job_age_days` | 20000, 60 |
 | `[power]` | `keep_awake` (no sleep while jobs run), `peer_jobs_on_battery` | on, false |
 | `[placement]` | `peer_wait_secs` | 600 |
-| `[machine]` | `devices` (attached test phones), `tools`, `denied_devices` (serials no job may name) | none |
-
-`denied_devices` protects a phone that is plugged in but must never be touched, such as your own:
-a job that names one of those serials anywhere in its command, in any case, or asks for it with
-`--device`, is refused.
+| `[machine]` | `devices`, `denied_devices`, `tools` | none |
+| `[confine]` | `peer_jobs`, `read`, `write` | `"on"`, none, none |
 
 Pressure figures are the kernel's stall percentages; memory levels are `normal`, `warn` and
 `critical`. A compile waits while the machine is busier than its limits, so a build never starts
 into a machine that is already swapping.
+
+## Devices
+
+`devices` lists the phones and other attached devices jobs on this machine may use.
+`denied_devices` lists the ones no job may ever touch, such as your own phone left on the cable to
+charge:
+
+```toml
+[machine]
+devices = ["9BWAY1LSDC"]           # the test phone
+denied_devices = ["<your phone's serial>"]
+```
+
+A job that names a denied serial anywhere in its command, in any case, or asks for it as its
+device is refused when it is submitted, also when another machine sends it. Nothing is denied by
+default.
+
+## Jobs from other machines
+
+A job that another machine sent here runs confined by the operating system (Landlock on Linux,
+Seatbelt on macOS). It can read and write the build cache, its synced checkout, temp and the
+toolchains (`~/.cargo`, `~/.rustup`, `~/.gradle`, the Android SDK, `~/Library/Developer`), read
+the system and a few tool settings, and cannot open anything else in your home folder, other
+volumes or `/root`. The first lines of its log say what it may reach.
+
+```toml
+[confine]
+read = ["~/datasets"]     # also readable by jobs from other machines
+write = []                # also writable
+# peer_jobs = "off"       # run them unconfined, as your user
+```
+
+A job that cannot be confined (for example on a kernel without Landlock) is refused with the
+reason, never run open. Jobs you submit on the machine itself are not confined.
 
 ## Build caches
 

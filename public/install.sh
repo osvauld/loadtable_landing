@@ -3,7 +3,7 @@
 #
 #   curl -fsSL https://loadtable.osvauld.com/install.sh | sh
 #
-# Downloads the release from repo.osvauld.com, checks its SHA-256, and installs
+# Downloads the release from dl.loadtable.osvauld.com, checks its SHA-256, and installs
 # loadtable and loadtabled into ~/.local/bin (no root needed). It does not start
 # or replace a running daemon: run `loadtabled install` afterwards.
 #
@@ -14,7 +14,7 @@
 
 set -eu
 
-REPO="https://repo.osvauld.com/loadtable"
+REPO="https://dl.loadtable.osvauld.com"
 
 say() { printf 'loadtable: %s\n' "$*"; }
 die() { printf 'loadtable: error: %s\n' "$*" >&2; exit 1; }
@@ -60,7 +60,7 @@ main() {
 
   version="${LOADTABLE_VERSION:-}"
   if [ -z "$version" ]; then
-    version=$(fetch "$REPO/latest") || die "could not reach repo.osvauld.com to find the latest release"
+    version=$(fetch "$REPO/latest") || die "could not reach dl.loadtable.osvauld.com to find the latest release"
   fi
   version=$(printf '%s' "$version" | tr -d ' \r\n')
   version="${version#v}"

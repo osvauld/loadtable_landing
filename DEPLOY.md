@@ -1,24 +1,26 @@
 # Deployment
 
+The site is served by Cloudflare Workers from this repository's `main` branch: the project builds
+with `npm run cf:build` (`astro build`, then `scripts/check-build.mjs`), deploys with
+`npx wrangler deploy`, and `wrangler.jsonc` serves `dist` with the headers in `public/_headers`.
+`loadtable.osvauld.com` is its custom domain. A pull request gets a preview build.
+
 ## Owner confirmations before publishing
 
 1. **Source link.** The install page tells people to `git clone https://github.com/osvauld/loadtable`.
-   The code is in `osvauld/task-manager` today. Rename or create the public repository first, or
-   change the install page.
-2. **The rename has shipped.** The docs use `loadtable`/`loadtabled`, `~/.local/state/loadtable`,
-   `.loadtable/run-policy.toml` and `LOADTABLE_WHO`. Publish after that build is released, or the
-   commands on the site will not exist.
-3. **Hosting.** Create a Cloudflare Workers project from this repository's `main` branch (build command
-   `npm run build && npm run check`, deploy command `npx wrangler deploy`; `wrangler.jsonc` serves
-   `dist`, `public/_headers` sets headers), and add `loadtable.osvauld.com` as its custom domain.
-4. **Push.** Committing locally does not authorize a push, a DNS change or a deploy.
+   Done 2026-10-29: `osvauld/task-manager` is renamed to `osvauld/loadtable` and public (old URLs
+   redirect).
+2. **A release to install.** The installer reads `https://dl.loadtable.osvauld.com/latest` and
+   downloads that release from the same host. v0.1.0 is there since 2026-10-29; a site change that
+   names a newer version waits for that release.
+3. **Push.** Committing locally does not authorize a push, a DNS change or a deploy.
 
 ## Validation
 
 ```sh
 npm ci
-npm run build
-npm run check
+npm run cf:build
+sh -n dist/install.sh
 ```
 
 Then check every page at 390 px and 1440 px wide, light and dark, for overflow and console errors.
