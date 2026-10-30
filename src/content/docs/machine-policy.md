@@ -32,7 +32,7 @@ sample names them.
 | `[cache]` | `sccache`, `sccache_size_gib` | `"auto"`, 30 |
 | `[runner]` | `wall_timeout_secs`, `idle_timeout_secs` | off, off |
 | `[retention]` | `max_finished_jobs`, `max_job_age_days` | 20000, 60 |
-| `[power]` | `keep_awake` (no sleep while jobs run), `peer_jobs_on_battery` | on, false |
+| `[power]` | `keep_awake` (no sleep while jobs run), `peer_jobs_on_battery`, `peer_jobs_min_battery_pct` | on, true, 30 |
 | `[placement]` | `peer_wait_secs` | 600 |
 | `[machine]` | `devices`, `denied_devices`, `tools` | none |
 | `[confine]` | `peer_jobs`, `read`, `write` | `"on"`, none, none |
