@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+// The release the front page names; change it with each release (docs/RELEASING.md in the app repo).
+const version = '0.1.2';
 const snippet = `Every build and test goes through LoadTable:
   loadtable run --who YOUR_AGENT --anywhere -- <command>
 --anywhere picks a free machine, --peer NAME picks one,
@@ -13,15 +15,11 @@ Name test targets: cargo test -p X --lib FILTER.`;
   <main id="main" class="wrap">
     <div class="hero">
       <div class="hero-copy">
-        <span class="label">A job queue for coding agents on your own machines</span>
-        <h1>Five agents. One laptop. Nobody freezes.</h1>
+        <span class="label">Five agents. One laptop. Nobody freezes.</span>
+        <h1>A build queue for your coding agents.</h1>
         <p class="lede">Claude Code, Codex, Cursor and the rest all reach for <code>cargo test</code> and <code>gradlew</code> at the same moment. <b>LoadTable</b> queues their heavy commands, runs each one on whichever of your machines can take it, and keeps a record of who ran what, where, and how long it took.</p>
-        <p class="sub">Your agents keep running where they are. Only the builds and tests move.</p>
-        <div class="cmd" aria-label="Example command"><span class="p">$ </span>loadtable run --who claude-a1 --anywhere -- cargo test -p core --lib</div>
-        <div class="cta">
-          <a class="btn" href="/docs/install">Install</a>
-          <a class="btn ghost" href="#how">How it works</a>
-        </div>
+        <div class="install" aria-label="Install command"><code><span class="p">$ </span><span id="install-cmd">curl -fsSL https://loadtable.osvauld.com/install.sh | sh</span></code><button class="btn" type="button" data-copy="install-cmd">Copy</button></div>
+        <p class="release"><span>v{version}</span><span>Linux and macOS</span><span>MIT</span><a href="/docs/install">Install guide</a><a href="/docs/status">Status</a></p>
       </div>
 
       <figure class="shot">
@@ -31,44 +29,122 @@ Name test targets: cargo test -p X --lib FILTER.`;
       </figure>
     </div>
 
-    <section class="band">
-      <div class="band-head"><span class="label">The problem</span><h2>Agents are fast. Your laptop is not.</h2></div>
+    <section class="band" id="run">
+      <div class="band-head"><span class="label">A real run</span><h2>One command, the right machine</h2><p>An agent on the laptop runs its tests; <code>--anywhere</code> sends them to the Linux desktop next to it. Output trimmed and paths shortened; nothing else changed.</p></div>
       <div class="band-body">
-        <div class="pain">
-          <div><h3>Everything starts at once</h3><p>Four sessions each run a full Rust test build. Memory fills, swap thrashes, the desktop stops responding.</p></div>
-          <div><h3>Timeouts turn into retries</h3><p>An agent's tool call gives up after ten minutes, so it starts the same build again on top of the first one.</p></div>
-          <div><h3>The spare machine sits idle</h3><p>The old desktop or the Mac on the shelf has cores and RAM nobody uses, because getting work there means SSH scripts and copied folders.</p></div>
-          <div><h3>Nobody knows what ran</h3><p>Which agent started that 45-minute build? Did it pass? How long does it usually take? The answer is scattered across terminal scrollback.</p></div>
+<pre class="term"><span class="p">$ </span>loadtable run --who claude-a1 --anywhere -- cargo test -p tasks-core --lib -j 6
+loadtable: submitted job 1721; … Ctrl-C detaches, loadtable cancel 1721 cancels
+<span class="lt">[loadtable] placement:</span> nixos (sent here by a peer, which chose this machine; the job runs where it was sent)
+<span class="lt">[loadtable] cache:</span> sccache ~/build-cache/sccache, target -&gt; ~/build-cache/…/target
+<span class="lt">[loadtable]</span> cargo -j 6 lowered to 3 (machine busy: cap 3)
+<span class="lt">[loadtable] confine:</span> this job came from another machine, so it runs confined: it cannot open anything in ~, /root, /run/media except: read and write ~/build-cache, ~/.cargo, ~/.rustup, …
+    Finished `test` profile [unoptimized] target(s) in 11.28s
+running 50 tests
+<span class="dim">…</span>
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+<span class="ok">job 1721 passed (exit 0) owner=claude-a1 on nixos</span></pre>
+        <ul class="notes">
+          <li><h3>Placed where it can start</h3><p><code>--anywhere</code> picks the machine that can start soonest. <code>--peer NAME</code> names one; <code>--pin</code> keeps it here.</p></li>
+          <li><h3>The checkout travels, not the repo</h3><p>Only the commits and edits the worker lacks are sent, over an encrypted link between paired machines.</p></li>
+          <li><h3>Warm caches, sane parallelism</h3><p>sccache and <code>target/</code> live on the worker's cache disk, and <code>-j</code> is cut to what the machine can take right now.</p></li>
+          <li><h3>Results come home</h3><p>The log streams back live and <code>run</code> exits with the job's exit code. <code>--fetch</code> brings files such as an APK back into the checkout.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="band-head"><span class="label">Why</span><h2>Every agent thinks it has the machine to itself</h2></div>
+      <div class="band-body">
+        <ul class="pa">
+          <li><div><h3>Everything starts at once</h3><p>Five sessions each start a full Rust test build. Memory fills, swap thrashes, the desktop stops responding.</p></div>
+            <div class="ans"><p>Each machine admits work by real memory, CPU and I/O pressure and by slots, so a job starts when it can finish. The rest wait their turn.</p></div></li>
+          <li><div><h3>The disk fills up</h3><p>Every agent's worktree grows its own <code>target/</code>, often tens of GB. Five agents fill a laptop disk, and then everything fails.</p></div>
+            <div class="ans"><p>One sccache per machine, each checkout's <code>target/</code> on a cache disk you choose, and a disk reserve that holds jobs back before the disk is full.</p></div></li>
+          <li><div><h3>The right machine sits idle</h3><p>The desktop has spare cores and Apple builds need the Mac on the shelf, but getting work there means SSH scripts and copied folders.</p></div>
+            <div class="ans"><p>Pair the machines once. Jobs go to whichever can start soonest; Apple builds go to the Mac, phone jobs to the machine with the phone.</p></div></li>
+          <li><div><h3>Nobody knows when it will finish</h3><p>An agent's tool call gives up after ten minutes and starts the same build again, on top of the first.</p></div>
+            <div class="ans"><p>Every queued and running job has an estimate from past runs of the same command, warm or cold. Agents are told to wait on job N, not resubmit.</p></div></li>
+          <li><div><h3>Nobody knows what ran</h3><p>Which agent started that 45-minute build? Did it pass? The answer is scattered across terminal scrollback.</p></div>
+            <div class="ans"><p>Who, what, where, how long, exit code and the full log, kept in a ledger and a signed audit log: <code>loadtable logs</code>, <code>log-search</code>, or the window.</p></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="band" id="pairing">
+      <div class="band-head"><span class="label">Pairing</span><h2>Add a machine in two commands</h2><p>Install LoadTable on each machine, then pair them. No SSH keys, no open ports.</p></div>
+      <div class="band-body">
+<pre class="term"><span class="dim"># on the machine that will take work: prints a one-use ticket, valid 15 minutes</span>
+<span class="p">$ </span>loadtable pair invite --both-ways
+
+<span class="dim"># on your laptop</span>
+<span class="p">$ </span>loadtable pair accept &lt;ticket&gt;
+<span class="p">$ </span>loadtable peers</pre>
+        <ul class="notes">
+          <li><h3>Reaches through any network</h3><p>On the same network machines connect directly; elsewhere through a relay that forwards encrypted traffic and cannot read it.</p></li>
+          <li><h3>You choose what each may do</h3><p><code>submit</code> sends jobs, <code>observe</code> watches, <code>admin</code> drains and resumes. <code>--both-ways</code> grants the same roles back.</p></li>
+          <li><h3>Revoke at any time</h3><p><code>loadtable peers revoke NAME</code> drops its grants, closes its connections and stops sending it work.</p></li>
+          <li><h3>Name your machines</h3><p>Placement uses machine names, so <code>--peer desktop</code> and <code>--peer mac</code> mean what you expect.</p></li>
+        </ul>
+        <p><a href="/docs/pairing">Pairing in detail →</a></p>
+      </div>
+    </section>
+
+    <section class="band" id="setup">
+      <div class="band-head"><span class="label">Toolchains</span><h2>Each machine brings its own toolchains</h2><p>LoadTable runs your commands; it does not install compilers. A worker needs LoadTable and whatever its jobs use.</p></div>
+      <div class="band-body">
+        <div class="fit">
+          <div class="yes"><h3>Send it as a job</h3>
+            <ul>
+              <li><code>loadtable run --peer mac -- rustup target add aarch64-apple-ios</code></li>
+              <li><code>rustup toolchain install</code> and <code>cargo install</code>, into <code>~/.cargo</code> and <code>~/.rustup</code></li>
+              <li>Android SDK packages with <code>sdkmanager</code>; Gradle fetches its own dependencies</li>
+              <li>Recorded like every other job</li>
+            </ul></div>
+          <div class="no"><h3>Do it once on the machine</h3>
+            <ul>
+              <li>Anything that needs <code>sudo</code>: <code>apt</code>, <code>dnf</code>, <code>pacman</code></li>
+              <li>Homebrew, which writes outside the folders a job may reach</li>
+              <li>Xcode and its command line tools</li>
+              <li>LoadTable itself and its service, <code>loadtabled install</code></li>
+            </ul></div>
         </div>
+        <p>A job from another machine may write only the build cache, its checkout, temp and the user toolchains (<code>~/.cargo</code>, <code>~/.rustup</code>, <code>~/.gradle</code>, the Android SDK, <code>~/Library/Developer</code>), and it cannot use <code>sudo</code>. That is the line between the two lists.</p>
       </div>
     </section>
 
-    <section class="band" id="how">
-      <div class="band-head"><span class="label">How it works</span><h2>From one command to a result</h2></div>
-      <div class="band-body">
-        <ol class="steps">
-          <li><div><h3>The agent submits</h3><p><code>loadtable run --who NAME -- &lt;command&gt;</code> from the CLI, or <code>submit</code> through the MCP server. It gets the job id straight away.</p></div></li>
-          <li><div><h3>Admission decides when</h3><p>Each machine admits work by real memory, CPU and disk pressure, queue class and slots, so jobs start when they can finish, not when they are typed.</p></div></li>
-          <li><div><h3>Placement decides where</h3><p><code>--anywhere</code> picks the machine that can start soonest, <code>--peer</code> names one, <code>--pin</code> keeps it local. Device jobs stay with the device.</p></div></li>
-          <li><div><h3>The checkout travels, not the repo</h3><p>Only the commits and edits the worker lacks are sent, over an encrypted peer-to-peer link between paired machines. No SSH, no open ports.</p></div></li>
-          <li><div><h3>The log streams back</h3><p>Output arrives live with an estimate from past runs of the same command. <code>run</code> exits with the job's own exit code.</p></div></li>
-          <li><div><h3>Outputs come home</h3><p><code>--fetch</code> brings named files, such as an APK, back into the checkout once the job ends.</p></div></li>
-          <li><div><h3>Everything is recorded</h3><p>Who, what, where, how long, exit code, full log, and a tamper-evident audit log. Searchable later with <code>loadtable logs</code> and <code>log-search</code>, or watched live in the desktop window, <code>loadtable ui</code>.</p></div></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="band">
-      <div class="band-head"><span class="label">What you get</span><h2>Built for Rust, Gradle and Apple builds</h2></div>
+    <section class="band" id="safety">
+      <div class="band-head"><span class="label">Safety</span><h2>A paired machine runs commands on yours</h2><p>So LoadTable bounds what those commands can reach, and writes down every one of them.</p></div>
       <div class="band-body">
         <div class="feats">
-          <div class="feat"><h3>Warm caches on every machine</h3><p>sccache for every cargo build, each checkout's <code>target/</code> on a cache disk, a shared Gradle home and a disk reserve that refuses jobs before the disk fills.</p></div>
-          <div class="feat"><h3>Fair across vendors</h3><p>Claude, Codex, Cursor and pi agents share one queue. <code>--who</code> names each one, and queue classes let a blocking fix go ahead of background lint.</p></div>
-          <div class="feat"><h3>Estimates you can plan around</h3><p>Per-command timing history, split by warm and cold builds, gives queued and running jobs an estimate and flags the build that is running far over its usual time.</p></div>
-          <div class="feat"><h3>House rules, enforced</h3><p>A per-repo run policy defines suites, caps <code>-j</code> and refuses unnamed broad test runs with the command to use instead, rather than hoping agents read the docs.</p></div>
-          <div class="feat"><h3>Phones, one at a time</h3><p><code>--device SERIAL</code> gives a job sole use of a test phone. Personal devices can be excluded outright.</p></div>
-          <div class="feat"><h3>Made for agents to read</h3><p>An MCP server, a fixed one-line result at the end of every run, <code>--detach</code> for long jobs and clear "wait on job N, do not resubmit" messages.</p></div>
+          <div class="feat"><h3>Confined by the OS</h3><p>Jobs from other machines run under Landlock (Linux) or Seatbelt (macOS): the cache, their checkout and the toolchains, nothing else in your home folder. A job that cannot be confined is refused.</p></div>
+          <div class="feat"><h3>Roles per machine</h3><p>Each pairing is a signed grant bound to the other machine's key, with its roles and an optional expiry. Every request is checked against it.</p></div>
+          <div class="feat"><h3>Encrypted link</h3><p>Machines talk over an encrypted peer-to-peer link. A relay can see that two machines talk, not what they say; turn it off for direct links only.</p></div>
+          <div class="feat"><h3>Secrets stay home</h3><p>Files that look like credentials (<code>.env</code>, SSH keys, <code>*.pem</code>, keystores) are not synced unless the repository tracks them.</p></div>
+          <div class="feat"><h3>A record that shows edits</h3><p>Every job, refusal, pairing and grant change is in the audit log, with checkpoints signed by the machine's key. <code>loadtable audit</code> reads it.</p></div>
+          <div class="feat"><h3>Personal devices off limits</h3><p>Deny a phone's serial in the machine policy and every job that names it is refused, also when another machine sends it.</p></div>
         </div>
+        <div class="fit">
+          <div class="no"><h3>What it does not do</h3>
+            <ul>
+              <li>Jobs you submit on a machine yourself run as you, unconfined</li>
+              <li>A job has the network, and can send what it can read</li>
+              <li>A job that changes a toolchain changes it for your own builds too</li>
+              <li>So pair only machines you would give an SSH login</li>
+            </ul></div>
+        </div>
+        <p><a href="/docs/security">The security model →</a></p>
+      </div>
+    </section>
+
+    <section class="band" id="start">
+      <div class="band-head"><span class="label">Tell your agents</span><h2>One paragraph in AGENTS.md</h2><p>Paste this into the repo's AGENTS.md or CLAUDE.md. Sessions with MCP get the same through the tools.</p></div>
+      <div class="band-body">
+        <div class="snippet">
+          <button class="btn ghost" type="button" data-copy="snip">Copy</button>
+          <pre id="snip">{snippet}</pre>
+        </div>
+        <p><a href="/docs/agents">Setting up agents →</a></p>
       </div>
     </section>
 
@@ -80,15 +156,13 @@ Name test targets: cargo test -p X --lib FILTER.`;
             <ul>
               <li>run two or more coding agents at the same time</li>
               <li>build heavy things: Rust workspaces, Android with Gradle, iOS and macOS apps</li>
-              <li>have a second machine: an old laptop, a desktop, a Mac mini or a Mac for Apple builds</li>
-              <li>mix agents from different vendors and want one queue for all of them</li>
+              <li>have a second machine: an old laptop, a desktop, a Mac mini</li>
               <li>want to know afterwards what ran, where, and whether it passed</li>
             </ul></div>
           <div class="no"><h3>Not what you need if you</h3>
             <ul>
-              <li>run one agent on small projects that build in seconds</li>
+              <li>run one agent on projects that build in seconds</li>
               <li>already send every build to cloud CI or a build farm</li>
-              <li>need a sandbox for untrusted code; jobs run as your user</li>
               <li>want to split one compile across machines, like distcc or Bazel remote execution</li>
               <li>run a fleet of servers; this is for a handful of personal machines</li>
             </ul></div>
@@ -134,17 +208,6 @@ Name test targets: cargo test -p X --lib FILTER.`;
             <li>GPU and file requirements for placement</li></ul></div>
         </div>
         <p><a href="/docs/status">Full status and known gaps →</a></p>
-      </div>
-    </section>
-
-    <section class="band" id="start">
-      <div class="band-head"><span class="label">Get started</span><h2>Tell your agents in one paragraph</h2><p>Install on each machine, pair them once, then paste this into the repo's AGENTS.md or CLAUDE.md.</p></div>
-      <div class="band-body">
-        <div class="snippet">
-          <button class="btn ghost" id="copy" type="button">Copy</button>
-          <pre id="snip">{snippet}</pre>
-        </div>
-        <p><a href="/docs/install">Install</a> · <a href="/docs/pairing">Pair machines</a> · <a href="/docs/agents">Set up agents</a></p>
       </div>
     </section>
   </main>

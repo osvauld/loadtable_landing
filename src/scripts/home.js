@@ -1,21 +1,22 @@
-// The homepage's copy button. External: the page policy allows no inline script.
-const copy = document.getElementById('copy');
-const snip = document.getElementById('snip');
-if (copy && snip) {
+// The homepage's copy buttons: each copies the text of the element its data-copy names.
+// External: the page policy allows no inline script.
+for (const button of document.querySelectorAll('button[data-copy]')) {
+  const source = document.getElementById(button.dataset.copy);
+  if (!source) continue;
+  const label = button.textContent;
   const select = () => {
     const r = document.createRange();
-    r.selectNodeContents(snip);
+    r.selectNodeContents(source);
     const s = getSelection();
     s.removeAllRanges();
     s.addRange(r);
-    copy.textContent = 'Selected';
+    button.textContent = 'Selected';
   };
-  copy.addEventListener('click', () => {
+  button.addEventListener('click', () => {
     const done = () => {
-      copy.textContent = 'Copied';
-      setTimeout(() => { copy.textContent = 'Copy'; }, 1600);
+      button.textContent = 'Copied';
+      setTimeout(() => { button.textContent = label; }, 1600);
     };
-    try { navigator.clipboard.writeText(snip.textContent).then(done, select); } catch { select(); }
+    try { navigator.clipboard.writeText(source.textContent).then(done, select); } catch { select(); }
   });
 }
-
