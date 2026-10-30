@@ -24,31 +24,11 @@ Name test targets: cargo test -p X --lib FILTER.`;
         </div>
       </div>
 
-      <div class="board" aria-label="Example queue board">
-        <header><span>QUEUE · example</span><span>3 machines · 2 running · 2 queued</span></header>
-        <div class="machines">
-          <div class="machine"><b>laptop</b><span class="role">Linux · where the agents run</span>
-            <div class="meter"><progress id="m0" max="100" value="34" aria-label="laptop memory pressure"></progress></div>
-            <div class="meter-l"><span>memory pressure</span><span>low</span></div></div>
-          <div class="machine"><b>desktop</b><span class="role">old desktop · worker</span>
-            <div class="meter"><progress id="m1" max="100" value="72" aria-label="desktop load"></progress></div>
-            <div class="meter-l"><span>12 cores</span><span>busy</span></div></div>
-          <div class="machine"><b>mac</b><span class="role">MacBook · worker</span>
-            <div class="meter"><progress id="m2" max="100" value="12" aria-label="mac load"></progress></div>
-            <div class="meter-l"><span>Apple builds</span><span>idle</span></div></div>
-        </div>
-        <ul class="jobs">
-          <li class="job"><span class="id">4712</span><span class="what">cargo test -p core --lib video</span><span class="st running" data-eta="190">ETA 3m10s</span>
-            <span class="meta"><span class="vendor">claude</span><span>who=call-ui-a1</span><span>on desktop</span></span></li>
-          <li class="job"><span class="id">4713</span><span class="what">./gradlew :app:assembleDebug</span><span class="st running" data-eta="105">ETA 1m45s</span>
-            <span class="meta"><span class="vendor">codex</span><span>who=android-b2</span><span>on desktop</span><span>fetch app-debug.apk</span></span></li>
-          <li class="job"><span class="id">4714</span><span class="what">cargo clippy --workspace -j 6</span><span class="st queued">queued #1</span>
-            <span class="meta"><span class="vendor">cursor</span><span>who=lint-c3</span><span>waits: desktop memory pressure</span></span></li>
-          <li class="job"><span class="id">4715</span><span class="what">xcodebuild -scheme App test</span><span class="st queued">queued #2</span>
-            <span class="meta"><span class="vendor">claude</span><span>who=ios-d4</span><span>for mac · priority background</span></span></li>
-        </ul>
-        <footer>job 4709 passed (exit 0) owner=vault-a2 on desktop</footer>
-      </div>
+      <figure class="shot">
+        <a class="when-light" href="/shots/window-light.webp"><img src="/shots/hero-light.webp" width="760" height="700" alt="The LoadTable window: three machines with their memory, CPU and slots, then four running jobs and four waiting ones, each with its owner, machine and reason for waiting." fetchpriority="high"></a>
+        <a class="when-dark" href="/shots/window-dark.webp"><img src="/shots/hero-dark.webp" width="760" height="700" alt="The LoadTable window: three machines with their memory, CPU and slots, then four running jobs and four waiting ones, each with its owner, machine and reason for waiting." fetchpriority="high"></a>
+        <figcaption>The desktop window, <code>loadtable ui</code>, with example data. <a class="when-light" href="/shots/window-light.webp">See it with a job open</a><a class="when-dark" href="/shots/window-dark.webp">See it with a job open</a></figcaption>
+      </figure>
     </div>
 
     <section class="band">
@@ -142,11 +122,13 @@ Name test targets: cargo test -p X --lib FILTER.`;
             <li>Linux laptop with Linux and macOS workers</li>
             <li>Queue, admission, queue classes, estimates</li>
             <li>Peer sync, log streaming, fetching outputs</li>
-            <li>Build caches, MCP server, desktop window</li></ul></div>
+            <li>Build caches, MCP server, desktop window</li>
+            <li>Each machine's exact build in <code>status</code></li></ul></div>
           <div><span class="pill run">In progress</span><ul>
-            <li>Showing each machine's exact build</li>
-            <li>Moving a waiting job when another machine frees up</li></ul></div>
+            <li>Confinement on macOS workers, still new</li>
+            <li>Suggesting split steps for Gradle build-and-test</li></ul></div>
           <div><span class="pill wait">Not yet</span><ul>
+            <li>Moving a waiting job when another machine frees up</li>
             <li>A Mac worker that goes to sleep</li>
             <li>Emptying idle caches automatically</li>
             <li>GPU and file requirements for placement</li></ul></div>

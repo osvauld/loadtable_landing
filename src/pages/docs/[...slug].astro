@@ -24,7 +24,7 @@ const href = (slug: string) => (slug ? `/docs/${slug}` : '/docs');
       </ul>
     </nav>
     <main id="main" class="docs-body">
-      <p class="docs-note">LoadTable is early software. These pages describe the current development build; see <a href="/docs/status">Status</a> for what is missing.</p>
+      <p class="docs-note">LoadTable is early software. These pages describe the latest release; see <a href="/docs/status">Status</a> for what is missing.</p>
       <Content />
       <nav class="docs-pager" aria-label="Previous and next page">
         {prev ? <a href={href(prev.slug)}><span>Previous</span>{prev.title}</a> : <span />}

@@ -1,6 +1,6 @@
 ---
 title: Status
-description: "What works today, what is in progress, and the known gaps of the current development build."
+description: "What works today, what is in progress, and the known gaps of the latest release."
 order: 10
 ---
 
