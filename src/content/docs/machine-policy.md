@@ -1,6 +1,6 @@
 ---
 title: Machine policy and caches
-description: "Tune slots, pressure limits, disk reserves and retention per machine, and how LoadTable keeps builds warm."
+description: "Tune slots, pressure limits, disk reserves and retention per machine, how LoadTable keeps builds warm, and freeing disk space."
 order: 8
 ---
 
@@ -32,7 +32,7 @@ sample names them.
 | `[cache]` | `sccache`, `sccache_size_gib` | `"auto"`, 30 |
 | `[runner]` | `wall_timeout_secs`, `idle_timeout_secs` | off, off |
 | `[retention]` | `max_finished_jobs`, `max_job_age_days` | 20000, 60 |
-| `[power]` | `keep_awake` (no sleep while jobs run), `peer_jobs_on_battery` | on, false |
+| `[power]` | `keep_awake` (no sleep while jobs run), `peer_jobs_on_battery`, `peer_jobs_min_battery_pct` | on, true, 30 |
 | `[placement]` | `peer_wait_secs` | 600 |
 | `[machine]` | `devices`, `denied_devices`, `tools` | none |
 | `[confine]` | `peer_jobs`, `read`, `write` | `"on"`, none, none |
@@ -94,5 +94,41 @@ loadtable cache    # the compiler wrapper in use, the cache root and its disk ag
 
 Do not override `RUSTC_WRAPPER` or `CARGO_TARGET_DIR` in jobs; LoadTable sets them.
 
-Emptying the caches of worktrees you no longer use is manual for now: remove the contents of the
-output directory the checkout's `target` link points to.
+## Freeing disk space
+
+Build output stays until you free it. `loadtable gc` shows what each checkout's output takes on
+every machine, and what can go:
+
+```text
+Build output kept per machine
+  laptop  42.4 GiB kept, 0 MiB can be freed
+  nixos   195.1 GiB kept, 129.2 GiB can be freed
+
+STATE    CHECKOUT                          BRANCH            LAST JOB   laptop     nixos
+merged   ~/app/.worktrees/group-voice      feature/voice     2d ago          -   15.5 GiB
+gone     (unknown checkout 1f6076078e29)   -                 1d ago          -    3.6 GiB
+active   ~/app                             dev               6h ago     18.5 GiB  19.6 GiB
+```
+
+Each checkout is in one of these states:
+
+| State | Meaning |
+|---|---|
+| `in use` | a job is queued or running in it; never freed |
+| `active` | used within the last 14 days (`--idle-days` to change) |
+| `idle` | no job for 14 days |
+| `merged` | its branch is in dev, main or master and no tracked file is changed |
+| `gone` | its working tree was deleted |
+| `old` | output from an older layout that no worktree links to |
+
+```sh
+loadtable gc                              # report only
+loadtable gc --delete merged,gone,old     # free those, on every machine
+loadtable gc --free ~/app/.worktrees/spike  # free one checkout, whatever its state
+```
+
+Only build output and the peers' synced copies are deleted. A working tree is never touched, a
+checkout a job uses is kept, and the shared compiler cache and Gradle home are shown but left
+alone. The next build of a freed checkout starts cold. The window's **Disk** tab shows the same
+report with tick boxes, and asks before it frees anything. A peer is included when it runs 0.1.4 or
+later; an older one is named as such.

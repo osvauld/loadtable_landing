@@ -34,6 +34,7 @@ loadtable list --who claude-a1 # one owner's jobs
 loadtable get 4712             # one job in full
 loadtable metrics 4712         # live CPU, memory and disk of a running job
 loadtable estimate -- cargo test -p core --lib
+loadtable gc                   # build output per checkout and machine; see Freeing disk space
 ```
 
 Before an agent starts a build, `list --active` tells it whether the same checkout already has

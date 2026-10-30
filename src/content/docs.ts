@@ -13,6 +13,6 @@ const files = import.meta.glob<MarkdownInstance<DocFrontmatter>>('./docs/*.md', 
 export const docs = Object.entries(files)
   .map(([path, md]) => {
     const name = path.slice('./docs/'.length, -'.md'.length);
-    return { slug: name === 'index' ? '' : name, ...md.frontmatter, Content: md.Content };
+    return { slug: name === 'index' ? '' : name, ...md.frontmatter, Content: md.Content, raw: md.rawContent() };
   })
   .sort((a, b) => a.order - b.order);

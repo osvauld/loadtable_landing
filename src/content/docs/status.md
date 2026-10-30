@@ -1,6 +1,6 @@
 ---
 title: Status
-description: "What works today, what is in progress, and the known gaps of the current development build."
+description: "What works today, what is in progress, and the known gaps of the latest release."
 order: 10
 ---
 
@@ -14,10 +14,12 @@ early software: expect rough edges, and read this page before relying on it.
 
 - Queue, admission by slots and pressure, queue classes, the short lane and the light pool.
 - Pairing, placement on peers and `--anywhere`, checkout sync, live logs, fetching outputs.
-- Timing history with separate warm and cold estimates. A command with no runs of its own is
+- Timing history with separate warm and cold estimates, shown as a range from the fastest recent
+  passing run to the slowest (`~5s–56s (median 16s)`). A command with no runs of its own is
   estimated from similar builds on the machine, and the estimate says what it is based on.
 - Run policy with suites, split test plans and suggestions from history.
 - sccache, per-checkout output directories, the Gradle home and the disk reserve.
+- Reporting and freeing build output on every machine (`loadtable gc`, the window's Disk tab).
 - The MCP server, the desktop window, the audit log and stall attribution.
 - Jobs from other machines run confined to the build cache and toolchains.
 - Each machine's exact build in `--version` and `status`.
@@ -35,7 +37,6 @@ early software: expect rough edges, and read this page before relying on it.
 - Cancelling a job after it passed marks it cancelled.
 - `policy show` does not print the `[placement]` section.
 - Placement has no GPU or file requirements yet.
-- Idle caches are emptied by hand.
 - The macOS release builds are not signed or notarized (the installer's binaries run; a browser
   download needs the quarantine flag removed).
 - Jobs you submit on a machine run there as your user, with your files; only jobs from other

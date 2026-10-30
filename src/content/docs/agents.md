@@ -45,6 +45,7 @@ Other MCP clients take the same command and argument.
 | `prioritize` | change a waiting job's queue class |
 | `cancel` | cancel your own job |
 | `audit` | the audit log |
+| `gc` | build output per checkout and machine, and freeing it |
 
 Every call takes a `who`: each agent should pass its own name. Cancelling a `wait` never touches
 the job, so an agent can wait in short pieces and keep its tool calls under the client's timeout.

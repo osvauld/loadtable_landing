@@ -92,7 +92,7 @@ loadtable ui
 
 opens a window on the daemon this shell uses: every paired machine with its slots and pressure, the
 queue and running jobs with live logs and estimates, plans as one row each, and tabs for history,
-timings, the audit log and pressure stalls. It reads and acts through the same daemon as the CLI,
+timings, disk use, the audit log and pressure stalls. It reads and acts through the same daemon as the CLI,
 so you can cancel a job, move it up a queue class or drain the machine from it.
 
 It needs a desktop session. The graphics libraries are loaded only when the window opens, so the

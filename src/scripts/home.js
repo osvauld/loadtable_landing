@@ -1,34 +1,22 @@
-// The homepage's copy button and the example board's ticking estimates. External: the page policy allows no inline script.
-const copy = document.getElementById('copy');
-const snip = document.getElementById('snip');
-if (copy && snip) {
+// The homepage's copy buttons: each copies the text of the element its data-copy names.
+// External: the page policy allows no inline script.
+for (const button of document.querySelectorAll('button[data-copy]')) {
+  const source = document.getElementById(button.dataset.copy);
+  if (!source) continue;
+  const label = button.textContent;
   const select = () => {
     const r = document.createRange();
-    r.selectNodeContents(snip);
+    r.selectNodeContents(source);
     const s = getSelection();
     s.removeAllRanges();
     s.addRange(r);
-    copy.textContent = 'Selected';
+    button.textContent = 'Selected';
   };
-  copy.addEventListener('click', () => {
+  button.addEventListener('click', () => {
     const done = () => {
-      copy.textContent = 'Copied';
-      setTimeout(() => { copy.textContent = 'Copy'; }, 1600);
+      button.textContent = 'Copied';
+      setTimeout(() => { button.textContent = label; }, 1600);
     };
-    try { navigator.clipboard.writeText(snip.textContent).then(done, select); } catch { select(); }
+    try { navigator.clipboard.writeText(source.textContent).then(done, select); } catch { select(); }
   });
-}
-
-if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const running = [...document.querySelectorAll('.st[data-eta]')].map(el => ({ el, start: Number(el.dataset.eta), left: Number(el.dataset.eta) }));
-  const fmt = s => { const m = Math.floor(s / 60), r = s % 60; return 'ETA ' + (m ? m + 'm' : '') + (m && r < 10 ? '0' : '') + r + 's'; };
-  const m0 = document.getElementById('m0'), m1 = document.getElementById('m1');
-  setInterval(() => {
-    for (const j of running) {
-      j.left = j.left > 5 ? j.left - 1 : j.start;
-      j.el.textContent = fmt(j.left);
-    }
-    if (m1) m1.value = 62 + Math.round(Math.sin(Date.now() / 4000) * 12);
-    if (m0) m0.value = 30 + Math.round(Math.cos(Date.now() / 5000) * 6);
-  }, 1000);
 }

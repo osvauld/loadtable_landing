@@ -18,8 +18,14 @@ order: 5
 For each machine that can run the job, LoadTable estimates when it would start (free slots, queue,
 pressure) and how long it takes there, from the timing history of the same command on that
 machine. Cold and warm builds are timed separately, so a machine with an empty cache is not
-credited with a rebuild's time. A machine running on battery does not take jobs from peers unless
-its [machine policy](/docs/machine-policy) allows it.
+credited with a rebuild's time.
+
+A machine on battery takes jobs from peers while its charge is above 30%. At or below that it
+holds them ("mac is on battery at 25%"), `status` and the desktop window say its battery is low,
+and `--anywhere` sends work to another machine instead. It still gets a job only it can run, such
+as an Apple build, which then waits for AC or the charge. Change the line on that machine with
+`peer_jobs_min_battery_pct` in its [machine policy](/docs/machine-policy) (0 turns it off), or set
+`peer_jobs_on_battery = false` to hold every job from peers while on battery.
 
 A repo can limit `--anywhere` jobs to one OS in its [run policy](/docs/run-policy):
 
