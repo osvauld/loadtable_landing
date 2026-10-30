@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 // The release the front page names; change it with each release (docs/RELEASING.md in the app repo).
-const version = '0.1.2';
+const version = '0.1.4';
 const snippet = `Every build and test goes through LoadTable:
   loadtable run --who YOUR_AGENT --anywhere -- <command>
 --anywhere picks a free machine, --peer NAME picks one,
@@ -60,11 +60,11 @@ test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
           <li><div><h3>Everything starts at once</h3><p>Five sessions each start a full Rust test build. Memory fills, swap thrashes, the desktop stops responding.</p></div>
             <div class="ans"><p>Each machine admits work by real memory, CPU and I/O pressure and by slots, so a job starts when it can finish. The rest wait their turn.</p></div></li>
           <li><div><h3>The disk fills up</h3><p>Every agent's worktree grows its own <code>target/</code>, often tens of GB. Five agents fill a laptop disk, and then everything fails.</p></div>
-            <div class="ans"><p>One sccache per machine, each checkout's <code>target/</code> on a cache disk you choose, and a disk reserve that holds jobs back before the disk is full.</p></div></li>
+            <div class="ans"><p>One sccache per machine, each checkout's <code>target/</code> on a cache disk you choose, and a disk reserve that holds jobs back before the disk is full. <code>loadtable gc</code> frees the output of merged and deleted worktrees on every machine.</p></div></li>
           <li><div><h3>The right machine sits idle</h3><p>The desktop has spare cores and Apple builds need the Mac on the shelf, but getting work there means SSH scripts and copied folders.</p></div>
             <div class="ans"><p>Pair the machines once. Jobs go to whichever can start soonest; Apple builds go to the Mac, phone jobs to the machine with the phone.</p></div></li>
           <li><div><h3>Nobody knows when it will finish</h3><p>An agent's tool call gives up after ten minutes and starts the same build again, on top of the first.</p></div>
-            <div class="ans"><p>Every queued and running job has an estimate from past runs of the same command, warm or cold. Agents are told to wait on job N, not resubmit.</p></div></li>
+            <div class="ans"><p>Every queued and running job has an estimate from past runs of the same command, warm or cold, as a range from the fastest recent run to the slowest. Agents are told to wait on job N, not resubmit.</p></div></li>
           <li><div><h3>Nobody knows what ran</h3><p>Which agent started that 45-minute build? Did it pass? The answer is scattered across terminal scrollback.</p></div>
             <div class="ans"><p>Who, what, where, how long, exit code and the full log, kept in a ledger and a signed audit log: <code>loadtable logs</code>, <code>log-search</code>, or the window.</p></div></li>
         </ul>
@@ -211,6 +211,7 @@ test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fin
             <li>Queue, admission, queue classes, estimates</li>
             <li>Peer sync, log streaming, fetching outputs</li>
             <li>Build caches, MCP server, desktop window</li>
+            <li>Freeing build output on every machine with <code>gc</code></li>
             <li>Each machine's exact build in <code>status</code></li></ul></div>
           <div><span class="pill run">In progress</span><ul>
             <li>Confinement on macOS workers, still new</li>
