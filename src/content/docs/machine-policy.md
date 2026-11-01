@@ -49,7 +49,7 @@ charge:
 
 ```toml
 [machine]
-devices = ["9BWAY1LSDC"]           # the test phone
+devices = ["PHONE00001"]           # the test phone
 denied_devices = ["<your phone's serial>"]
 ```
 
